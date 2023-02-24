@@ -21,6 +21,7 @@ int mode = 0;
 //mode 3 = looking for falling edge of input
 long timeStart = 0;
 int numOverflows = 0;
+char String[25];
 
 void Initialize() {
 	cli(); //disable global interrupts for setup
@@ -80,6 +81,29 @@ ISR(TIMER1_OVF_vect) {
 int main(void)
 {
 	Initialize();
-	output();
-	while (1);
+	//output();
+	print_init();
+	while (1) {
+		sprintf(String, "hello \n");
+		print(String);
+		_delay_ms(1000);
+	}
+}
+void print_init() {
+	int baudRate = 9600;
+	unsigned long Fcpu = 16000000UL;
+	long baudPrescaler = (((Fcpu / (baudRate * 16UL))) - 1)
+	UBRR0H = (unsigned char)(baudPrescaler >> 8);
+}
+void print(char* StringToPrint) {
+	while (*StringToPrint != 0x00) {
+		printChar(*StringToPrint);
+		StringToPrint++;
+	}
+}
+void printChar(unsigned char c) {
+	//waif for empty transmit buffer
+	while (!(UCSR0A & (1<<UDRE0)));
+	//send data through buffer
+	UDR0 = c;
 }
