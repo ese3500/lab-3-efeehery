@@ -20,7 +20,7 @@ void Initialize() {
 	DDRD |= (1<<DDD6); //set buzzer to output pin (PD6 = OC0A)
 	PORTD |= (1<<PORTD6); // set initially to low
 	
-	//timer 0 setup, sets pre scaler to 256
+	//timer 0 setup, sets pre scaler to 64
 	TCCR0B |= (1<<CS00);
 	TCCR0B |= (1<<CS01);
 	TCCR0B &= ~(1<<CS02);
@@ -34,7 +34,7 @@ void Initialize() {
 	TCCR0A |= (1<<COM0A0);
 	TCCR0A &= ~(1<<COM0A1);
   
-	OCR0A = 142;16*10^6 / 64 / (440*2*2) = 142
+	OCR0A = 142;//16*10^6 / 64 / (440*2*2) = 142
 	sei();//enable global interrupts
 }
 
