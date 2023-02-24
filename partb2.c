@@ -23,8 +23,8 @@ void Initialize() {
 	TCCR0B &= ~(1<<CS00);
 	TCCR0B &= ~(1<<CS01);
 	TCCR0B |= (1<<CS02);
-	//sets prescaler to 1024
-	//16^6 / 1024 / 440 * 2 = 71
+	//sets prescaler to 256
+	//16*10^6 / 256 / *440 * 2) = 71
 	TIMSK0 |= (1<<OCIE0A);//enables output compare
 	OCR0A = 71;
 	sei();//enable global interrupts
