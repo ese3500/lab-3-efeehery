@@ -205,7 +205,20 @@ int main(void)
 		OCR0A = converted;
 		sprintf(String, "%u :discrete? \n", (int)discrete);
 		print(String);*/
-		sprintf(String, "%u :ADC val \n", adc);
+		sprintf(String, "ADC: %u \n", adc);
+		print(String);
+		//(ADC-240)/75
+		int index = (adc-240)/75;
+		if (index < 0) {
+			index = 0;
+		}
+		if (index > 9) {
+			index = 9;
+		}
+		//(index/9)*45+5
+		double i = index;
+		int dc = (i / 9.0) * 45.0 + 5;
+		sprintf(String, "Duty Cycle: %u \n", dc);
 		print(String);
 		_delay_ms(1000);
 	}
