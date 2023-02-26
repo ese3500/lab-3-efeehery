@@ -187,8 +187,6 @@ int main(void)
 	print_init();
 	Initialize();
 	while (1) {
-		//sprintf(String, "%u mode \n", mode);
-		//print(String);
 		if (mode == 0) {
 			PORTD |= (1<<PORTD7);//output high
 			_delay_us(5000);
@@ -208,14 +206,12 @@ int main(void)
 			}
 			converted = discrete_freqs[pos_in_range];
 		}
-		sprintf(String, "%u :num \n", converted);
-		print(String);
+		//sprintf(String, "%u :OCR0A \n", converted);
+		//print(String);
 		OCR0A = converted;
-		sprintf(String, "%u :discrete? \n", (int)discrete);
+		sprintf(String, "%u :discrete \n", (int)discrete);
 		print(String);
 		
-		sprintf(String, "ADC: %u \n", adc);
-		print(String);
 		//(ADC-240)/75
 		int index = (adc-240)/75;
 		if (index < 0) {
@@ -227,11 +223,7 @@ int main(void)
 		//(index/9)*45+5
 		double i = index;
 		int dc = (i / 9.0) * 45.0 + 5;
-		sprintf(String, "Duty Cycle: %u \n", dc);
-		print(String);
-		OCR0B = converted * (1.0 - 0.15);
-		sprintf(String, "val: %u \n", OCR0B);
-		print(String);
-		_delay_ms(10000);
+		OCR0B = OCR0A * (1.0 - (dc/100.0));
+		_delay_ms(1000);
 	}
 }
