@@ -28,7 +28,7 @@ int distanceCM = 0;
 
 bool discrete = 1;
 int discrete_freqs[8] = {30, 32, 35, 40, 45, 47, 53, 60};
-	
+
 int adc = -1;
 
 void print_init() {
@@ -52,13 +52,41 @@ void print(char* StringToPrint) {
 		StringToPrint++;
 	}
 }
-
+void photoSetup() {
+	//ADC photoresistor setup
+	PRR &= ~(1<<PRADC); //clear power reduction for adc
+	//select Vref = AVcc
+	ADMUX |= (1<<REFS0);
+	ADMUX &= ~(1<<REFS1);
+	//set the ADC clock div by 128
+	ADCSRA |= (1<<ADPS0);
+	ADCSRA |= (1<<ADPS1);
+	ADCSRA |= (1<<ADPS2);
+	//select channel 0
+	ADMUX &= ~(1<<MUX0);
+	ADMUX &= ~(1<<MUX1);
+	ADMUX &= ~(1<<MUX2);
+	ADMUX &= ~(1<<MUX3);
+	//set to free running
+	ADCSRA |= (1<<ADATE); //autotriggering of ADC
+	ADCSRB &= ~(1<<ADTS0); //free running mode ADTS[2:0]==000
+	ADCSRB &= ~(1<<ADTS1);
+	ADCSRB &= ~(1<<ADTS2);
+	//disable digital input buffer on ADC pin
+	DIDR0 |= (1<<ADC0D);
+	//enable ADC
+	ADCSRA |= (1<<ADEN);
+	//enable ADC interrupt
+	ADCSRA |= (1<<ADIE);
+	//start conversion
+	ADCSRA |= (1<<ADSC);
+}
 void Initialize() {
 	sprintf(String, "initialize \n");
 	print(String);
 	_delay_ms(100);
 	cli(); //disable global interrupts for setup
-	
+	//photoSetup();
 	//pin 8 is the input - echo - B0  (PB0=ICP1=PCINT0 -input capture for timer 1)
 	//pin 7 is the output - trig - D7
 	
@@ -111,43 +139,16 @@ void Initialize() {
 	//toggle OC1A on compare match
 	TCCR0A |= (1<<COM0A0);
 	TCCR0A &= ~(1<<COM0A1);
-	
 	//OC0B = 1 on compare match when up counting; OC0B = 0 on comp match when down counting
 	//OC0B = PCINT21 - PD5
 	TCCR0A |= (1<<COM0B0);
 	TCCR0A |= (1<<COM0B1);
 	
-	OCR0A = 30;//initial values
-	OCR0B = 25; //=OCR0A*(1-duty_cycle_of_15)
+	OCR0A = 30;
+	OCR0B = OCR0A * (1.0 - (45/100.0));//initial duty cycle of 45
 	
-	//ADC photoresistor setup
-	PRR &= ~(1<<PRADC); //clear power reduction for adc
-	//select Vref = AVcc
-	ADMUX |= (1<<REFS0);
-	ADMUX &= ~(1<<REFS1);
-	//set the ADC clock div by 128
-	ADCSRA |= (1<<ADPS0);
-	ADCSRA |= (1<<ADPS1);
-	ADCSRA |= (1<<ADPS2);
-	//select channel 0
-	ADMUX &= ~(1<<MUX0);
-	ADMUX &= ~(1<<MUX1);
-	ADMUX &= ~(1<<MUX2);
-	ADMUX &= ~(1<<MUX3);
-	//set to free running
-	ADCSRA |= (1<<ADATE); //autotriggering of ADC
-	ADCSRB &= ~(1<<ADTS0); //free running mode ADTS[2:0]==000
-	ADCSRB &= ~(1<<ADTS1);
-	ADCSRB &= ~(1<<ADTS2);
-	//disable digital input buffer on ADC pin
-	DIDR0 |= (1<<ADC0D);
-	//enable ADC
-	ADCSRA |= (1<<ADEN);
-	//enable ADC interrupt
-	ADCSRA |= (1<<ADIE);
-	//start conversion
-	ADCSRA |= (1<<ADSC);
-
+	photoSetup();
+	
 	sei();//enable global interrupts
 }
 ISR(ADC_vect) {
@@ -206,10 +207,10 @@ int main(void)
 			}
 			converted = discrete_freqs[pos_in_range];
 		}
-		//sprintf(String, "%u :OCR0A \n", converted);
+		//sprintf(String, "%u :num \n", converted);
 		//print(String);
 		OCR0A = converted;
-		sprintf(String, "%u :discrete \n", (int)discrete);
+		sprintf(String, "%u :discrete? \n", (int)discrete);
 		print(String);
 		
 		//(ADC-240)/75
