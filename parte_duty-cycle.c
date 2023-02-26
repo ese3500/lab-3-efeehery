@@ -45,7 +45,7 @@ void Initialize() {
 	TCCR0A |= (1<<COM0B1);
   
 	OCR0A = 142;//16*10^6 / 64 / (440*2*2) = 142
-	OCR0B = 120; //=OCR0A*(1-duty_cycle)
+	OCR0B = OCR0A * (1.0 - (duty_cycle/100.0)); //=OCR0A*(1-duty_cycle) = 120
 	sei();//enable global interrupts
 }
 
